@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Navbar, TextInput } from "flowbite-react";
+import { Button, Navbar, NavbarCollapse, NavbarLink, NavbarToggle, TextInput } from "flowbite-react";
 import { Link, useLocation } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
@@ -36,22 +36,22 @@ const Header = () => {
           <FaMoon />
         </Button>
         <Link to="/sign-in">
-          <Button gradientDeoTone="purpleToBlue">Sign In</Button>
+          <Button className="bg-gradient-to-br from-purple-600 to-blue-500 text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 outline">Sign In</Button>
         </Link>
-        <Navbar.Toggle />
+        <NavbarToggle />
       </div>
 
-      <Navbar.Collapse>
-        <Navbar.Link active={path === "/"} as={'div'}>
+      <NavbarCollapse>
+        <NavbarLink active={path === "/"} as={"div"}>
           <Link to="/">Home</Link>
-        </Navbar.Link>
-        <Navbar.Link active={path === "/about"} as={'div'}>
+        </NavbarLink>
+        <NavbarLink active={path === "/about"} as={"div"}>
           <Link to="/about">About</Link>
-        </Navbar.Link>
-        <Navbar.Link active={path === "/projects"} as={'div'}>
+        </NavbarLink>
+        <NavbarLink active={path === "/projects"} as={"div"}>
           <Link to="/projects">Projects</Link>
-        </Navbar.Link>
-      </Navbar.Collapse>
+        </NavbarLink>
+      </NavbarCollapse>
     </Navbar>
   );
 };
