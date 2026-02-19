@@ -1,8 +1,10 @@
-require("dotenv").config({path: '../.env'});
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const userRouter = require('./routes/userRoute.js')
 
 const app = express();
+app.use(express.json());
 
 async function DBconnection() {
   try {
@@ -15,6 +17,8 @@ async function DBconnection() {
 }
 
 DBconnection();
+
+app.use('/api', userRouter)
 
 const PORT = process.env.PORT || 3000;
 

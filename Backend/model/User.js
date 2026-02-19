@@ -21,4 +21,5 @@ const userSchema = new mongooes.Schema(
 );
 
 const User = mongooes.model("User", userSchema);
-export default User;
+
+module.exports = User;
