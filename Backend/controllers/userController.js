@@ -1,3 +1,5 @@
-export const test = (req, res) => {
-    res.json("API");
-}
+const test = (req, res) => {
+  res.json("API");
+};
+
+module.exports = { test };
