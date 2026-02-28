@@ -1,13 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const userRoutes = require('./routes/userRoute.js')
-const authRoutes = require('./routes/authRoute.js');
+const userRoutes = require("./routes/userRoute.js");
+const authRoutes = require("./routes/authRoute.js");
 const logger = require("./middleware/logger.js");
 
 const app = express();
 app.use(express.json());
-app.use(logger)
+app.use(logger);
 
 async function DBconnection() {
   try {
@@ -21,8 +21,18 @@ async function DBconnection() {
 
 DBconnection();
 
-app.use('/api/user', userRoutes)
-app.use('/api/auth', authRoutes)
+app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal server error";
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 
