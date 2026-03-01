@@ -1,5 +1,12 @@
 import React from "react";
-import { Button, Navbar, NavbarCollapse, NavbarLink, NavbarToggle, TextInput } from "flowbite-react";
+import {
+  Button,
+  Navbar,
+  NavbarCollapse,
+  NavbarLink,
+  NavbarToggle,
+  TextInput,
+} from "flowbite-react";
 import { Link, useLocation } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
@@ -10,12 +17,17 @@ const Header = () => {
     <Navbar className="border-b-2">
       <Link
         to="/"
-        className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white"
+        className="self-center whitespace-nowrap text-sm 
+        sm:text-xl font-semibold dark: text-white"
       >
-        <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
-          Sahand's
+        <span
+          className="px-2 py-1 bg-linear-to-r 
+        from-slate-900 via-teal-500 to-cyan-400
+        rounded-lg text-white"
+        >
+          Nexora
         </span>
-        Blog
+        <span className="text-black dark:text-white">Blogs</span>
       </Link>
 
       <form>
@@ -35,21 +47,28 @@ const Header = () => {
         <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
           <FaMoon />
         </Button>
+
         <Link to="/sign-in">
-          <Button className="bg-gradient-to-br from-purple-600 to-blue-500 text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 outline">Sign In</Button>
+          <Button
+            className="bg-linear-to-r 
+        from-slate-900 via-teal-500 to-cyan-400"
+          >
+            Sign In
+          </Button>
         </Link>
-        <NavbarToggle />
       </div>
 
+      <NavbarToggle />
+
       <NavbarCollapse>
-        <NavbarLink active={path === "/"} as={"div"}>
-          <Link to="/">Home</Link>
+        <NavbarLink active={path === "/"} as={Link} href="/">
+          Home
         </NavbarLink>
-        <NavbarLink active={path === "/about"} as={"div"}>
-          <Link to="/about">About</Link>
+        <NavbarLink active={path === "/about"} as={Link} href="/about">
+          About
         </NavbarLink>
-        <NavbarLink active={path === "/projects"} as={"div"}>
-          <Link to="/projects">Projects</Link>
+        <NavbarLink active={path === "/projects"} as={Link} href="/projects">
+          Projects
         </NavbarLink>
       </NavbarCollapse>
     </Navbar>
