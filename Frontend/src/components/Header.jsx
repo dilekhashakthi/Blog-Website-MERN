@@ -27,7 +27,7 @@ const Header = () => {
         >
           Nexora
         </span>
-        <span className="text-black dark:text-white">Blogs</span>
+        <span className="text-black dark:text-white">Blog</span>
       </Link>
 
       <form>
