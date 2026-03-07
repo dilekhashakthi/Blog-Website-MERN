@@ -14,12 +14,15 @@ import {
 } from "flowbite-react";
 import { Link, useLocation } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
-import { FaMoon } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { FaMoon, FaSun } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { toggoleTheme } from "../redux/theme/themeSlice";
 
 const Header = () => {
   const path = useLocation().pathname;
+  const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
+  const { theme } = useSelector((state) => state.theme);
   return (
     <Navbar className="border-b-2">
       <Link
@@ -51,8 +54,13 @@ const Header = () => {
       </Button>
 
       <div className="flex gap-2 md:order-2">
-        <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
-          <FaMoon />
+        <Button
+          className="w-12 h-10 hidden sm:inline"
+          color="gray"
+          pill
+          onClick={() => dispatch(toggoleTheme)}
+        >
+          {theme === 'light' ? <FaSun /> : <FaMoon /> }
         </Button>
 
         {currentUser ? (
@@ -65,10 +73,12 @@ const Header = () => {
           >
             <DropdownHeader>
               <span className="block text-sm">@{currentUser.username}</span>
-              <span className="block text-sm font-medium truncate">{currentUser.email}</span>
+              <span className="block text-sm font-medium truncate">
+                {currentUser.email}
+              </span>
             </DropdownHeader>
-            <Link to={'/dashboard?tab=profile'}>
-            <DropdownItem>Profile</DropdownItem>
+            <Link to={"/dashboard?tab=profile"}>
+              <DropdownItem>Profile</DropdownItem>
             </Link>
             <DropdownDivider />
             <DropdownItem>Sign Out</DropdownItem>
