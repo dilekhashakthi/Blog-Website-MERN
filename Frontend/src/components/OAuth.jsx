@@ -37,7 +37,7 @@ const OAuth = () => {
   return (
     <Button
       type="button"
-      className="text-black border-black hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white hover:border-transparent"
+      className="text-black border-black hover:bg-linear-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white hover:border-transparent"
       outline
       onClick={handleGoogleClick}
     >
