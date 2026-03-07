@@ -1,6 +1,11 @@
 import React from "react";
 import {
+  Avatar,
   Button,
+  Dropdown,
+  DropdownDivider,
+  DropdownHeader,
+  DropdownItem,
   Navbar,
   NavbarCollapse,
   NavbarLink,
@@ -10,9 +15,11 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const path = useLocation().pathname;
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <Navbar className="border-b-2">
       <Link
@@ -48,14 +55,34 @@ const Header = () => {
           <FaMoon />
         </Button>
 
-        <Link to="/sign-in">
-          <Button
-            className="bg-linear-to-r 
-        from-slate-900 via-teal-500 to-cyan-400"
+        {currentUser ? (
+          <Dropdown
+            arrowIcon={false}
+            inline
+            label={
+              <Avatar alt="user" img={currentUser.profilePicture} rounded />
+            }
           >
-            Sign In
-          </Button>
-        </Link>
+            <DropdownHeader>
+              <span className="block text-sm">@{currentUser.username}</span>
+              <span className="block text-sm font-medium truncate">{currentUser.email}</span>
+            </DropdownHeader>
+            <Link to={'/dashboard?tab=profile'}>
+            <DropdownItem>Profile</DropdownItem>
+            </Link>
+            <DropdownDivider />
+            <DropdownItem>Sign Out</DropdownItem>
+          </Dropdown>
+        ) : (
+          <Link to="/sign-in">
+            <Button
+              className="bg-linear-to-r 
+        from-slate-900 via-teal-500 to-cyan-400"
+            >
+              Sign In
+            </Button>
+          </Link>
+        )}
       </div>
 
       <NavbarToggle />
