@@ -98,13 +98,13 @@ const Header = () => {
       <NavbarToggle />
 
       <NavbarCollapse>
-        <NavbarLink active={path === "/"} as={Link} href="/">
+        <NavbarLink active={path === "/"} as={Link} to="/">
           Home
         </NavbarLink>
-        <NavbarLink active={path === "/about"} as={Link} href="/about">
+        <NavbarLink active={path === "/about"} as={Link} to="/about">
           About
         </NavbarLink>
-        <NavbarLink active={path === "/projects"} as={Link} href="/projects">
+        <NavbarLink active={path === "/projects"} as={Link} to="/projects">
           Projects
         </NavbarLink>
       </NavbarCollapse>
