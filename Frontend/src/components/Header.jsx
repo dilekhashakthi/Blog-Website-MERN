@@ -58,9 +58,9 @@ const Header = () => {
           className="w-12 h-10 hidden sm:inline"
           color="gray"
           pill
-          onClick={() => dispatch(toggoleTheme)}
+          onClick={() => dispatch(toggoleTheme())}
         >
-          {theme === 'light' ? <FaSun /> : <FaMoon /> }
+          {theme === "light" ? <FaSun /> : <FaMoon />}
         </Button>
 
         {currentUser ? (

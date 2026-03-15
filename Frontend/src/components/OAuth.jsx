@@ -16,7 +16,7 @@ const OAuth = () => {
     provider.setCustomParameters({ prompt: "select_account" });
     try {
       const resultsFromGoogle = await signInWithPopup(auth, provider);
-      const result = await fetch('api/auth/google', {
+      const result = await fetch('/api/auth/google', {
         method: "POST",
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify({
@@ -41,8 +41,8 @@ const OAuth = () => {
       outline
       onClick={handleGoogleClick}
     >
-      <AiFillGoogleCircle className="w-6 h-6 mr2" />
-      Contiue with Google
+      <AiFillGoogleCircle className="w-6 h-6 mr-2" />
+      Continue with Google
     </Button>
   );
 };

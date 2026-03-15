@@ -76,7 +76,7 @@ const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (user) {
-      const token = jwt.sign({ id: user._id });
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password, ...withoutPassword } = user._doc;
       res
         .status(200)
