@@ -23,8 +23,16 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    // Called after a successful profile update (e.g. profile picture upload)
+    updateSuccess: (state, action) => {
+      state.currentUser = { ...state.currentUser, ...action.payload };
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
-export const { signInStart, signInSuccess, signInFailure } = userSlice.actions;
+export const { signInStart, signInSuccess, signInFailure, updateSuccess } =
+  userSlice.actions;
+
 export default userSlice.reducer;
