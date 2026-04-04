@@ -1,3 +1,8 @@
 @import "tailwindcss";
 @import "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
+
+/* Tell Tailwind v4 to activate `dark:` classes via the .dark parent class
+   (instead of the default prefers-color-scheme media query).
+   ThemeProvider sets class="dark" on the root div to control dark mode. */
+@variant dark (&:where(.dark, .dark *));

@@ -22,7 +22,7 @@ const SignUp = () => {
     e.preventDefault();
 
     if (!formData.username || !formData.email || !formData.password) {
-      return setErrorMessage("All fiels are required..!");
+      return setErrorMessage("All fields are required..!");
     }
 
     try {
@@ -85,6 +85,7 @@ const SignUp = () => {
                 id="username"
                 name="username"
                 placeholder="John"
+                autoComplete="username"
                 onChange={handleChange}
               />
             </div>
@@ -96,6 +97,7 @@ const SignUp = () => {
                 id="email"
                 name="email"
                 placeholder="johndeo@example.com"
+                autoComplete="email"
                 onChange={handleChange}
               />
             </div>
@@ -106,6 +108,7 @@ const SignUp = () => {
                 type="password"
                 id="password"
                 name="password"
+                autoComplete="new-password"
                 onChange={handleChange}
               />
             </div>

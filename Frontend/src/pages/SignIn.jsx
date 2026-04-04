@@ -28,7 +28,7 @@ const SignIn = () => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
-      return dispatch(signInFailure("All fiels are required..!"));
+      return dispatch(signInFailure("All fields are required!"));
     }
 
     try {
@@ -89,6 +89,7 @@ const SignIn = () => {
                 id="email"
                 name="email"
                 placeholder="johndeo@example.com"
+                autoComplete="email"
                 onChange={handleChange}
               />
             </div>
@@ -99,6 +100,7 @@ const SignIn = () => {
                 type="password"
                 id="password"
                 name="password"
+                autoComplete="current-password"
                 onChange={handleChange}
               />
             </div>
