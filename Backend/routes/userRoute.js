@@ -5,6 +5,7 @@ const {
   uploadProfilePicture,
   streamProfilePicture,
   updateUser,
+  deletedUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -23,4 +24,7 @@ router.put(
   uploadProfilePicture
 );
 
-module.exports = router;
+// Delete user (protected)
+router.delete("/delete/:id", verifyToken, deletedUser);
+
+module.exports = router;

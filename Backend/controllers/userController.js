@@ -5,7 +5,6 @@ const User = require("../model/User");
 const errorHandler = require("../utils/error");
 const { getBucket } = require("../utils/gridfs");
 
-
 // Helper: upload a buffer into GridFS and return the new file's _id
 const uploadBufferToGridFS = (buffer, filename, contentType) => {
   return new Promise((resolve, reject) => {
@@ -102,14 +101,18 @@ const updateUser = async (req, res, next) => {
 
   if (req.body.password) {
     if (req.body.password.length < 6) {
-      return next(errorHandler(400, "Password must be at least 6 characters long"));
+      return next(
+        errorHandler(400, "Password must be at least 6 characters long"),
+      );
     }
     req.body.password = bcrypt.hashSync(req.body.password, 10);
   }
 
   if (req.body.username) {
     if (req.body.username.length < 7 || req.body.username.length > 20) {
-      return next(errorHandler(400, "Username must be between 7 and 20 characters long"));
+      return next(
+        errorHandler(400, "Username must be between 7 and 20 characters long"),
+      );
     }
     if (req.body.username.includes(" ")) {
       return next(errorHandler(400, "Username cannot contain spaces"));
@@ -118,7 +121,9 @@ const updateUser = async (req, res, next) => {
       return next(errorHandler(400, "Username must be in lowercase"));
     }
     if (!req.body.username.match(/^[a-zA-Z0-9]+$/)) {
-      return next(errorHandler(400, "Username can only contain letters and numbers"));
+      return next(
+        errorHandler(400, "Username can only contain letters and numbers"),
+      );
     }
   }
 
@@ -137,7 +142,7 @@ const updateUser = async (req, res, next) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       { $set: fields },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUser) {
@@ -149,7 +154,25 @@ const updateUser = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
 };
 
-module.exports = { uploadProfilePicture, streamProfilePicture, updateUser };
+// DELETE /api/user/delete/:id
+const deletedUser = async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(errorHandler(403, "You are not allowed to delete this user"));
+  }
+
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "User has been deleted" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  uploadProfilePicture,
+  streamProfilePicture,
+  updateUser,
+  deletedUser,
+};
