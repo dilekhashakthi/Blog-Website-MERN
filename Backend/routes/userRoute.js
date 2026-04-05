@@ -4,9 +4,13 @@ const verifyToken = require("../middleware/verifyToken");
 const {
   uploadProfilePicture,
   streamProfilePicture,
+  updateUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
+
+// Update user (protected)
+router.put("/update/:id", verifyToken, updateUser);
 
 // Stream a profile picture from GridFS (public)
 router.get("/profile-picture/:fileId", streamProfilePicture);
@@ -19,4 +23,4 @@ router.put(
   uploadProfilePicture
 );
 
-module.exports = router;
+module.exports = router;

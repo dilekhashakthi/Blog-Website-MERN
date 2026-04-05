@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
 const { Readable } = require("stream");
+const bcrypt = require("bcryptjs");
 const User = require("../model/User");
 const errorHandler = require("../utils/error");
 const { getBucket } = require("../utils/gridfs");
+
 
 // Helper: upload a buffer into GridFS and return the new file's _id
 const uploadBufferToGridFS = (buffer, filename, contentType) => {
@@ -92,4 +94,62 @@ const streamProfilePicture = async (req, res, next) => {
   }
 };
 
-module.exports = { uploadProfilePicture, streamProfilePicture };
+// PUT /api/user/update/:id
+const updateUser = async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(errorHandler(403, "You are not allowed to update this user"));
+  }
+
+  if (req.body.password) {
+    if (req.body.password.length < 6) {
+      return next(errorHandler(400, "Password must be at least 6 characters long"));
+    }
+    req.body.password = bcrypt.hashSync(req.body.password, 10);
+  }
+
+  if (req.body.username) {
+    if (req.body.username.length < 7 || req.body.username.length > 20) {
+      return next(errorHandler(400, "Username must be between 7 and 20 characters long"));
+    }
+    if (req.body.username.includes(" ")) {
+      return next(errorHandler(400, "Username cannot contain spaces"));
+    }
+    if (req.body.username !== req.body.username.toLowerCase()) {
+      return next(errorHandler(400, "Username must be in lowercase"));
+    }
+    if (!req.body.username.match(/^[a-zA-Z0-9]+$/)) {
+      return next(errorHandler(400, "Username can only contain letters and numbers"));
+    }
+  }
+
+  try {
+    const fields = {};
+    if (req.body.username) {
+      fields.username = req.body.username;
+    }
+    if (req.body.email) {
+      fields.email = req.body.email;
+    }
+    if (req.body.password) {
+      fields.password = req.body.password;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: fields },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return next(errorHandler(404, "User not found"));
+    }
+
+    const { password, ...rest } = updatedUser._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
+
+};
+
+module.exports = { uploadProfilePicture, streamProfilePicture, updateUser };
