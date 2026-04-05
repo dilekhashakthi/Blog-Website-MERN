@@ -3,9 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useDispatch, useSelector } from "react-redux";
-import { updateSuccess } from "../redux/user/userSlice";
+import {
+  updateStart,
+  updateSuccess,
+  updateFailure,
+} from "../redux/user/userSlice";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_TYPES = ["image/jpeg", "image/png"];
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 
 const safeParseJSON = (text) => {
@@ -19,13 +23,19 @@ const safeParseJSON = (text) => {
 
 const DashProfile = () => {
   const dispatch = useDispatch();
-  const { currentUser } = useSelector((state) => state.user);
+  const {
+    currentUser,
+    loading,
+    error: reduxError,
+  } = useSelector((state) => state.user);
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadError, setUploadError] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(null);
+  const [profileUpdateSuccess, setProfileUpdateSuccess] = useState(null); // renamed to avoid shadowing imported updateSuccess
+  const [formData, setFormData] = useState({});
 
   const filePickerRef = useRef();
   const xhrRef = useRef(null);
@@ -68,7 +78,7 @@ const DashProfile = () => {
     setUploadProgress(null);
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setUploadError("Only image files (JPEG, PNG, WebP, GIF) are allowed.");
+      setUploadError("Only JPEG and PNG files are allowed.");
       e.target.value = "";
       return;
     }
@@ -128,7 +138,7 @@ const DashProfile = () => {
           setTimeout(() => setUploadProgress(null), 1000);
         } else {
           setUploadError(
-            parsed?.message ?? "Failed to upload image. Please try again."
+            parsed?.message ?? "Failed to upload image. Please try again.",
           );
           setUploadProgress(null);
           setImagePreviewUrl(null);
@@ -157,12 +167,50 @@ const DashProfile = () => {
   const isUploading = uploadProgress !== null && uploadProgress < 100;
   const displayImage = imagePreviewUrl || currentUser.profilePicture;
 
+  // onChange now populates formData so updates can be submitted
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // form now has onSubmit, feedback is shown on success/failure
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setProfileUpdateSuccess(null);
+
+    // Clear any previous redux error so stale errors don't linger
+    if (Object.keys(formData).length === 0) {
+      return;
+    }
+
+    try {
+      dispatch(updateStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        dispatch(updateFailure(data.message));
+      } else {
+        dispatch(updateSuccess(data));
+        setProfileUpdateSuccess("Profile updated successfully!");
+        setFormData({}); // reset dirty fields
+      }
+    } catch (error) {
+      dispatch(updateFailure(error.message));
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
       <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
 
-      <form className="flex flex-col gap-4">
-        {/* ── Hidden file input ── */}
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        {/* Hidden file input */}
         <input
           type="file"
           accept="image/*"
@@ -171,7 +219,7 @@ const DashProfile = () => {
           hidden
         />
 
-        {/* ── Avatar with CircularProgressbar as border ring ── */}
+        {/* Avatar with CircularProgressbar ring */}
         <div
           className="relative self-center cursor-pointer"
           style={{ width: 128, height: 128 }}
@@ -219,47 +267,71 @@ const DashProfile = () => {
           />
         </div>
 
-        {/* ── Alerts ── */}
+        {/* Image upload alerts */}
         {uploadError && (
           <Alert color="failure" onDismiss={() => setUploadError(null)}>
             <span className="font-medium">Upload failed: </span>
             {uploadError}
           </Alert>
         )}
-
         {uploadSuccess && (
           <Alert color="success" onDismiss={() => setUploadSuccess(null)}>
             {uploadSuccess}
           </Alert>
         )}
 
-        {/* ── Form fields ── */}
+        {/* Profile update success/error alerts */}
+        {profileUpdateSuccess && (
+          <Alert
+            color="success"
+            onDismiss={() => setProfileUpdateSuccess(null)}
+          >
+            {profileUpdateSuccess}
+          </Alert>
+        )}
+        {reduxError && (
+          <Alert
+            color="failure"
+            onDismiss={() => dispatch(updateFailure(null))}
+          >
+            <span className="font-medium">Update failed: </span>
+            {reduxError}
+          </Alert>
+        )}
+
         <TextInput
           type="text"
           id="username"
           placeholder="Username"
           defaultValue={currentUser.username}
+          onChange={handleChange}
         />
         <TextInput
           type="email"
           id="email"
           placeholder="Email"
           defaultValue={currentUser.email}
+          onChange={handleChange}
         />
         <TextInput
           type="password"
           id="password"
           placeholder="New password"
           autoComplete="new-password"
+          onChange={handleChange}
         />
 
         <Button
           type="submit"
           gradientDuoTone="purpleToPink"
           outline
-          disabled={isUploading}
+          disabled={isUploading || loading}
         >
-          {isUploading ? "Uploading photo…" : "Update Profile"}
+          {loading
+            ? "Saving…"
+            : isUploading
+              ? "Uploading photo…"
+              : "Update Profile"}
         </Button>
       </form>
 
