@@ -18,6 +18,9 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  signoutStart,
+  signoutSuccess,
+  signoutFailure,
 } from "../redux/user/userSlice";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];
@@ -233,6 +236,23 @@ const DashProfile = () => {
     }
   };
 
+  const handleSignout = async () => {
+    try {
+      dispatch(signoutStart());
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        dispatch(signoutFailure(data.message));
+      } else {
+        dispatch(signoutSuccess());
+      }
+    } catch (error) {
+      dispatch(signoutFailure(error.message));
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
       <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
@@ -370,7 +390,12 @@ const DashProfile = () => {
         >
           Delete Account
         </span>
-        <span className="cursor-pointer hover:underline">Sign Out</span>
+        <span
+          className="cursor-pointer hover:underline"
+          onClick={handleSignout}
+        >
+          Sign Out
+        </span>
       </div>
 
       {/* Consolidated alerts */}

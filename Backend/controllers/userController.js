@@ -170,9 +170,22 @@ const deletedUser = async (req, res, next) => {
   }
 };
 
+// POST /api/user/signout
+const signout = (req, res, next) => {
+  try {
+    res
+      .clearCookie("access_token")
+      .status(200)
+      .json({ message: "User has been signed out" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   uploadProfilePicture,
   streamProfilePicture,
   updateUser,
   deletedUser,
+  signout,
 };
