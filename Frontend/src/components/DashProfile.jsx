@@ -1,12 +1,23 @@
-import { Alert, Button, TextInput } from "flowbite-react";
+import {
+  Alert,
+  Button,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  TextInput,
+} from "flowbite-react";
 import React, { useEffect, useRef, useState } from "react";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import {
   updateStart,
   updateSuccess,
   updateFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from "../redux/user/userSlice";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];
@@ -23,19 +34,16 @@ const safeParseJSON = (text) => {
 
 const DashProfile = () => {
   const dispatch = useDispatch();
-  const {
-    currentUser,
-    loading,
-    error: reduxError,
-  } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadError, setUploadError] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(null);
-  const [profileUpdateSuccess, setProfileUpdateSuccess] = useState(null); // renamed to avoid shadowing imported updateSuccess
+  const [profileUpdateSuccess, setProfileUpdateSuccess] = useState(null);
   const [formData, setFormData] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   const filePickerRef = useRef();
   const xhrRef = useRef(null);
@@ -48,8 +56,6 @@ const DashProfile = () => {
   const startSimulatedProgress = () => {
     let current = 0;
     simulatorRef.current = setInterval(() => {
-      // Small increments (1–3%) every 100ms → ~2.5s to reach 85%
-      // Slows down naturally as it approaches 85 (feels realistic)
       const remaining = 85 - current;
       const increment = Math.random() * 2 + 1; // 1–3% per tick
       current += Math.min(increment, remaining * 0.15); // decelerate near 85
@@ -76,6 +82,7 @@ const DashProfile = () => {
     setUploadError(null);
     setUploadSuccess(null);
     setUploadProgress(null);
+    setProfileUpdateSuccess(null);
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       setUploadError("Only JPEG and PNG files are allowed.");
@@ -110,6 +117,7 @@ const DashProfile = () => {
   const uploadImage = (file) => {
     setUploadError(null);
     setUploadSuccess(null);
+    setProfileUpdateSuccess(null);
     setUploadProgress(0);
     startSimulatedProgress();
 
@@ -177,6 +185,8 @@ const DashProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setProfileUpdateSuccess(null);
+    setUploadError(null);
+    setUploadSuccess(null);
 
     // Clear any previous redux error so stale errors don't linger
     if (Object.keys(formData).length === 0) {
@@ -202,6 +212,24 @@ const DashProfile = () => {
       }
     } catch (error) {
       dispatch(updateFailure(error.message));
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    setShowModal(false);
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        dispatch(deleteUserFailure(data.message));
+      } else {
+        dispatch(deleteUserSuccess());
+      }
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
     }
   };
 
@@ -289,13 +317,13 @@ const DashProfile = () => {
             {profileUpdateSuccess}
           </Alert>
         )}
-        {reduxError && (
+        {error && (
           <Alert
             color="failure"
             onDismiss={() => dispatch(updateFailure(null))}
           >
             <span className="font-medium">Update failed: </span>
-            {reduxError}
+            {error}
           </Alert>
         )}
 
@@ -336,9 +364,49 @@ const DashProfile = () => {
       </form>
 
       <div className="text-red-500 flex justify-between mt-5">
-        <span className="cursor-pointer hover:underline">Delete Account</span>
+        <span
+          className="cursor-pointer hover:underline"
+          onClick={() => setShowModal(true)}
+        >
+          Delete Account
+        </span>
         <span className="cursor-pointer hover:underline">Sign Out</span>
       </div>
+
+      {/* Consolidated alerts */}
+      {error && (
+        <Alert color="failure" className="mt-5">
+          {error}
+        </Alert>
+      )}
+
+      {/* Delete Account Modal */}
+      <Modal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        popup
+        size="md"
+      >
+        <ModalHeader />
+        <ModalBody>
+          <div className="text-center">
+            <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
+            <h3 className="mb-5 text-lg text-gray-500 dark:text-gray-400">
+              {" "}
+              Are you sure you want to delete your account?
+            </h3>
+            <div className="flex justify-center gap-4">
+              <Button color="failure" onClick={handleDeleteUser}>
+                Yes, I'm sure
+              </Button>
+              <Button color="gray" onClick={() => setShowModal(false)}>
+                {" "}
+                No, cancel
+              </Button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 };
