@@ -2,10 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const userRoutes = require("./routes/userRoute.js");
-const authRoutes = require("./routes/authRoute.js");
 const logger = require("./middleware/logger.js");
 const { initGridFS } = require("./utils/gridfs.js");
+
+const userRoutes = require("./routes/userRoute.js");
+const authRoutes = require("./routes/authRoute.js");
+const postRoutes = require("./routes/postRoute.js");
 
 const app = express();
 
@@ -28,6 +30,7 @@ DBconnection();
 
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/post", postRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
