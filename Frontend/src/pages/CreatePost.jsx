@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -17,25 +16,25 @@ const CreatePost = () => {
   const [formData, setFormData] = useState({});
   const [publishError, setPublishError] = useState(null);
 
-  // ─── Simulated progress (same pattern as DashProfile) ───────────────────────
-  let simulatorRef = null;
+  // Simulated progress (same pattern as DashProfile)
+  const simulatorRef = useRef(null);
 
   const startSimulatedProgress = (setter) => {
     let current = 0;
-    simulatorRef = setInterval(() => {
+    simulatorRef.current = setInterval(() => {
       const remaining = 85 - current;
       const increment = Math.random() * 2 + 1;
       current += Math.min(increment, remaining * 0.15);
       if (current >= 85) {
         current = 85;
-        clearInterval(simulatorRef);
+        clearInterval(simulatorRef.current);
       }
       setter(Math.round(current));
     }, 100);
-    return simulatorRef;
+    return simulatorRef.current;
   };
 
-  // ─── Upload image to our own MongoDB/GridFS backend ──────────────────────────
+  // Upload image to our own MongoDB/GridFS backend
   const handleUploadImage = async () => {
     if (!file) {
       setImageUploadError("Please select an image");
@@ -44,7 +43,7 @@ const CreatePost = () => {
     setImageUploadError(null);
     setImageUploadProgress(0);
 
-    const interval = startSimulatedProgress(setImageUploadProgress);
+    startSimulatedProgress(setImageUploadProgress);
 
     try {
       const data = new FormData();
@@ -56,7 +55,7 @@ const CreatePost = () => {
         body: data,
       });
 
-      clearInterval(interval);
+      clearInterval(simulatorRef.current);
       const json = await res.json();
 
       if (!res.ok) {
@@ -66,16 +65,20 @@ const CreatePost = () => {
       }
 
       setImageUploadProgress(100);
-      setFormData((prev) => ({ ...prev, image: json.imageUrl, imageFileId: json.fileId }));
+      setFormData((prev) => ({
+        ...prev,
+        image: json.imageUrl,
+        imageFileId: json.fileId,
+      }));
       setTimeout(() => setImageUploadProgress(null), 1000);
     } catch {
-      clearInterval(interval);
+      clearInterval(simulatorRef.current);
       setImageUploadError("Image upload failed. Check your connection.");
       setImageUploadProgress(null);
     }
   };
 
-  // ─── Publish post ────────────────────────────────────────────────────────────
+  // Publish post
   const handleSubmit = async (e) => {
     e.preventDefault();
     setPublishError(null);
@@ -110,8 +113,7 @@ const CreatePost = () => {
     }
   };
 
-  const isUploading =
-    imageUploadProgress !== null && imageUploadProgress < 100;
+  const isUploading = imageUploadProgress !== null && imageUploadProgress < 100;
 
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
@@ -147,25 +149,24 @@ const CreatePost = () => {
             outline
             onClick={handleUploadImage}
             disabled={isUploading}
+            className="w-52 h-10.75"
           >
             {isUploading ? (
               <span className="flex items-center gap-2">
-                <span className="w-7 h-7 inline-block">
-                  <CircularProgressbar
-                    value={imageUploadProgress || 0}
-                    text={`${imageUploadProgress || 0}%`}
-                    styles={buildStyles({
-                      rotation: 0.25,
-                      strokeLinecap: "round",
-                      textSize: "28px",
-                      pathTransitionDuration: 0.4,
-                      pathColor: `rgba(130, 80, 255, ${(imageUploadProgress || 0) / 100 + 0.3})`,
-                      textColor: "#ffffff",
-                      trailColor: "rgba(255,255,255,0.15)",
-                      backgroundColor: "#3e3e5e",
-                    })}
-                  />
-                </span>
+                <div
+                  className="radial-progress"
+                  style={{
+                    "--value": `${imageUploadProgress ?? 0}`,
+                    "--size": "1.5rem",
+                    "--thickness": "3px",
+                  }}
+                  aria-valuenow={imageUploadProgress ?? 0}
+                  role="progressbar"
+                >
+                  <span style={{ fontSize: "6px" }}>
+                    {imageUploadProgress}%
+                  </span>
+                </div>
                 Uploading...
               </span>
             ) : (
@@ -174,9 +175,7 @@ const CreatePost = () => {
           </Button>
         </div>
 
-        {imageUploadError && (
-          <Alert color="failure">{imageUploadError}</Alert>
-        )}
+        {imageUploadError && <Alert color="failure">{imageUploadError}</Alert>}
 
         {formData.image && (
           <img
@@ -196,9 +195,7 @@ const CreatePost = () => {
           }
         />
 
-        {publishError && (
-          <Alert color="failure">{publishError}</Alert>
-        )}
+        {publishError && <Alert color="failure">{publishError}</Alert>}
 
         <Button type="submit" gradientDuoTone="purpleToPink">
           Publish
