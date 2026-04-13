@@ -16,7 +16,10 @@ const postSchema = new mongoose.Schema(
       unique: true,
     },
     image: {
-      type: String,
+      type: String, // URL: /api/post/image/:fileId
+    },
+    imageFileId: {
+      type: String, // GridFS file _id (for deletion)
     },
     category: {
       type: String,
@@ -33,4 +36,4 @@ const postSchema = new mongoose.Schema(
 
 const Post = mongoose.model("Post", postSchema);
 
-export default Post;
+module.exports = Post;

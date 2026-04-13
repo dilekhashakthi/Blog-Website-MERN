@@ -3,12 +3,12 @@ const { Readable } = require("stream");
 const bcrypt = require("bcryptjs");
 const User = require("../model/User");
 const errorHandler = require("../utils/error");
-const { getBucket } = require("../utils/gridfs");
+const { getProfileBucket } = require("../utils/gridfs");
 
 // Helper: upload a buffer into GridFS and return the new file's _id
 const uploadBufferToGridFS = (buffer, filename, contentType) => {
   return new Promise((resolve, reject) => {
-    const bucket = getBucket();
+    const bucket = getProfileBucket();
     const uploadStream = bucket.openUploadStream(filename, { contentType });
 
     const readable = Readable.from(buffer);
@@ -36,7 +36,7 @@ const uploadProfilePicture = async (req, res, next) => {
     // Delete the old GridFS file if one exists
     if (user.profilePictureFileId) {
       try {
-        const bucket = getBucket();
+        const bucket = getProfileBucket();
         await bucket.delete(
           new mongoose.Types.ObjectId(user.profilePictureFileId),
         );
@@ -76,7 +76,7 @@ const uploadProfilePicture = async (req, res, next) => {
 // GET /api/user/profile-picture/:fileId — streams the image from GridFS
 const streamProfilePicture = async (req, res, next) => {
   try {
-    const bucket = getBucket();
+    const bucket = getProfileBucket();
     const fileId = new mongoose.Types.ObjectId(req.params.fileId);
 
     const files = await bucket.find({ _id: fileId }).toArray();
