@@ -6,3 +6,10 @@
    (instead of the default prefers-color-scheme media query).
    ThemeProvider sets class="dark" on the root div to control dark mode. */
 @variant dark (&:where(.dark, .dark *));
+
+/* Quill editor placeholder color in dark mode */
+/* Targets the snow theme's placeholder pseudo-element and forces a lighter color */
+.dark .ql-snow .ql-editor.ql-blank::before,
+.dark .ql-editor.ql-blank::before {
+  color: rgba(255, 255, 255, 0.75) !important;
+}

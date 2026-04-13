@@ -22,6 +22,7 @@ import {
   signoutSuccess,
   signoutFailure,
 } from "../redux/user/userSlice";
+import { Link } from "react-router-dom";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
@@ -381,6 +382,18 @@ const DashProfile = () => {
               ? "Uploading photo…"
               : "Update Profile"}
         </Button>
+
+        {currentUser.isAdmin && (
+          <Link to={"/create-post"}>
+            <Button
+              type="button"
+              gradientDuoTone="purpleToPink"
+              className="w-full"
+            >
+              Create a post
+            </Button>
+          </Link>
+        )}
       </form>
 
       <div className="text-red-500 flex justify-between mt-5">
